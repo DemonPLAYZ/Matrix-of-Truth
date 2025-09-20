@@ -115,7 +115,7 @@ export default function Navbar() {
               >
                 <img
                   src={logo}
-                  alt="TruthTell Logo"
+                  alt="Logo"
                   className="h-10 w-10 rounded-full border-2 border-fuchsia-500"
                 />
               </motion.div>
