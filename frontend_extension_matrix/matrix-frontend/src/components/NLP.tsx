@@ -551,11 +551,11 @@ const NLP: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center mb-8">
+      <h1 className="text-3xl text-white font-bold text-center mb-8">
         NLP Fact Checker
       </h1>
 
-      <div className="bg-zinc-900 p-6 rounded-lg shadow-md mb-8">
+      <div className="bg-gray-900 p-6 rounded-lg shadow-md mb-8">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label

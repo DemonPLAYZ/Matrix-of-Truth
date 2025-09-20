@@ -426,7 +426,7 @@ import NewsUrlAnalysis from "./userInput Functions/NewsUrlAnalysis";
 
 export default function UserInput() {
   return (
-    <div className="container mx-auto p-8 bg-black text-white min-h-screen">
+    <div className="container mx-auto p-8 bg-gray-900 text-white min-h-screen">
       <h1 className="text-3xl font-bold mb-8">Content Verification</h1>
 
       <Tabs defaultValue="text" className="w-full">

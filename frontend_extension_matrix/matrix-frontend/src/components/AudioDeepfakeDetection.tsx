@@ -40,7 +40,7 @@ export default function AudioDeepfakeDetection() {
     };
 
     return (
-        <div className="container mx-auto p-8 bg-black text-white flex items-center justify-center">
+        <div className="container mx-auto p-8 text-white flex items-center justify-center">
             <Card className="w-full max-w-2xl bg-gray-900 border-gray-800">
                 <CardContent className="p-6">
                     <div className="space-y-4">
