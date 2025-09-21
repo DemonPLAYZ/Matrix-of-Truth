@@ -7,6 +7,7 @@ import nest_asyncio
 nest_asyncio.apply()
 from fc.newsfetcher import NewsFetcher
 import os
+import time
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from routes.user_broadcast import router
@@ -39,6 +40,8 @@ scheduler = AsyncIOScheduler()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    print(f"Starting application on port: {os.getenv('PORT', '8000')}")
+    
     news_docs = news_fetcher.db_service.news_ref.limit(1).get()
 
     if len(list(news_docs)) == 0:
@@ -47,10 +50,15 @@ async def lifespan(app: FastAPI):
     scheduler.add_job(fetch_and_broadcast_news, 'interval', seconds=60000000)
     # await fetch_and_broadcast_news()
     scheduler.start()
+    print(f"Application startup complete. Ready to serve traffic on port {os.getenv('PORT', '8000')}")
     yield
+    print("Application shutting down...")
     scheduler.shutdown()
 
 app = FastAPI(lifespan=lifespan)
+
+# Ensure port is available for Render
+PORT = int(os.getenv("PORT", 8000))
 
 # Configure CORS
 app.add_middleware(
@@ -71,16 +79,30 @@ app.include_router(deepfake_audio_router, tags=["Audio Detection"])
 app.include_router(video_broadcast.router)
 app.include_router(nlp_router, prefix="/nlp", tags=["NLP Analysis"])
 app.include_router(deepfake_router, prefix="/deepfake", tags=["Deepfake Detection"])
+
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to the API"}
+    return {"message": "Welcome to the API", "status": "ready"}
 
 @app.get("/health")
 def health_check():
     return {
         "status": "healthy",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "port": PORT,
+        "environment": os.getenv("RENDER_SERVICE_NAME", "local")
     }
 
+@app.get("/ready")
+def readiness_check():
+    """Quick readiness probe for load balancers"""
+    return {"status": "ready", "timestamp": time.time()}
+
+@app.get("/ping")
+def ping():
+    """Ultra-fast ping endpoint"""
+    return "pong"
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
