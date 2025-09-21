@@ -1,6 +1,6 @@
 # 🌐 Matrix of Truth: AI-Powered Misinformation Detection System
 
-![](https://img.shields.io/badge/GenAI Exchange Hackathon-HackathonProject-blue)
+![](https://img.shields.io/badge/GenAI-Exchange-Hackathon-HackathonProject-blue)
 ![](https://img.shields.io/badge/Team-Coders%40IIITB-purple)
 ![](https://img.shields.io/badge/Technology-AI%20%26%20NLP-green)
 ![](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)
