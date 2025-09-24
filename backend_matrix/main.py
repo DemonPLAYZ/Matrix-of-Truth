@@ -4,7 +4,23 @@ import uvicorn
 from routes.news_fetch import news_router
 from routes.user_inputs import input_router
 import nest_asyncio
-nest_asyncio.apply()
+import asyncio
+
+# Only apply nest_asyncio if we're not using uvloop
+try:
+    if not isinstance(asyncio.get_event_loop(), type(asyncio.new_event_loop())):
+        # We're using a different event loop (like uvloop), don't patch
+        pass
+    else:
+        nest_asyncio.apply()
+except Exception:
+    # If there's any issue, try to apply nest_asyncio anyway for compatibility
+    try:
+        nest_asyncio.apply()
+    except ValueError:
+        # If nest_asyncio fails, continue without it
+        pass
+
 from fc.newsfetcher import NewsFetcher
 import os
 import time
