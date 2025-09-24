@@ -12,7 +12,15 @@ echo "Port: ${PORT:-8000}"
 export PYTHONPATH="/app:$PYTHONPATH"
 
 # Create necessary directories
-mkdir -p /app/log /app/craap_results /app/craap_results_v2
+mkdir -p /app/log /app/craap_results /app/craap_results_v2 /tmp/matplotlib /tmp/numba_cache
+
+# Set memory-efficient environment variables
+export MPLCONFIGDIR="/tmp/matplotlib"
+export MPLBACKEND="Agg"
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export NUMBA_CACHE_DIR="/tmp/numba_cache"
 
 # Download NLTK data if needed (minimal set)
 python -c "

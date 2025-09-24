@@ -5,6 +5,15 @@ from routes.news_fetch import news_router
 from routes.user_inputs import input_router
 import nest_asyncio
 import asyncio
+import os
+
+# Set memory-efficient environment variables
+os.environ.setdefault('MPLCONFIGDIR', '/tmp/matplotlib')
+os.environ.setdefault('MPLBACKEND', 'Agg')
+os.environ.setdefault('OMP_NUM_THREADS', '1')
+os.environ.setdefault('MKL_NUM_THREADS', '1')
+os.environ.setdefault('OPENBLAS_NUM_THREADS', '1')
+os.environ.setdefault('NUMBA_CACHE_DIR', '/tmp/numba_cache')
 
 # Only apply nest_asyncio if we're not using uvloop
 try:

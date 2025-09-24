@@ -40,7 +40,13 @@ FROM python:3.12-slim as production
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/opt/venv/bin:$PATH" \
-    PYTHONPATH="/app:$PYTHONPATH"
+    PYTHONPATH="/app:$PYTHONPATH" \
+    MPLCONFIGDIR="/tmp/matplotlib" \
+    MPLBACKEND="Agg" \
+    OMP_NUM_THREADS=1 \
+    MKL_NUM_THREADS=1 \
+    OPENBLAS_NUM_THREADS=1 \
+    NUMBA_CACHE_DIR="/tmp/numba_cache"
 
 # Install runtime system dependencies
 RUN apt-get update && apt-get install -y \
@@ -70,8 +76,8 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 COPY --chown=appuser:appuser . .
 
 # Create necessary directories and set permissions
-RUN mkdir -p /app/log /app/craap_results /app/craap_results_v2 && \
-    chown -R appuser:appuser /app
+RUN mkdir -p /app/log /app/craap_results /app/craap_results_v2 /tmp/matplotlib /tmp/numba_cache && \
+    chown -R appuser:appuser /app /tmp/matplotlib /tmp/numba_cache
 
 # Switch to non-root user
 USER appuser
