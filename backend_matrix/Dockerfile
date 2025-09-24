@@ -20,6 +20,13 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     wget \
     curl \
+    libxml2-dev \
+    libxslt1-dev \
+    zlib1g-dev \
+    libjpeg-dev \
+    libpng-dev \
+    libfreetype6-dev \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first to leverage Docker cache
