@@ -27,7 +27,7 @@ scipy==1.15.2
 torch>=2.0.0 --index-url https://download.pytorch.org/whl/cpu
 transformers>=4.30.0
 scikit-learn==1.5.2
-# xgboost==2.0.3  # Commented out to reduce memory - uncomment if needed
+xgboost==2.0.3
 tensorflow-cpu>=2.12.0
 huggingface_hub>=0.16.0
 sentencepiece>=0.1.95
