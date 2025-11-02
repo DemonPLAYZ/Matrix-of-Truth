@@ -141,6 +141,9 @@ export default function Navbar() {
               >
                 Dashboard
               </Link>
+              <Link to="/spot-the-fake"
+                className="text-white hover:text-fuchsia-400 transition-colors font-medium"
+                >Spot the Fake</Link>
               <Link
                 to="/about"
                 className="text-white hover:text-fuchsia-400 transition-colors font-medium"

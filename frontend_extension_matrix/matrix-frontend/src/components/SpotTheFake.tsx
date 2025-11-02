@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, Button, Container, Grid, Typography, Box } from '@mui/material';
-import { useAuth } from '../context/AuthContext'; // adjust path as needed
 
 interface GameItem {
     id: string;
@@ -25,7 +24,6 @@ export default function SpotTheFake() {
     const [choice, setChoice] = useState<number | null>(null);
     const [answer, setAnswer] = useState<GameAnswer | null>(null);
     const [loading, setLoading] = useState(true);
-    const { user } = useAuth();
 
     const fetchNewPair = async () => {
         setLoading(true);
@@ -56,8 +54,8 @@ export default function SpotTheFake() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 pair_id: pair.id,
-                choice: choiceIndex,
-                user_id: user?.id || 'anonymous'
+                choice: choiceIndex
+                // user_id: user?.id || 'anonymous'
             })
         });
 

@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from routes.news_fetch import news_router
@@ -18,7 +18,103 @@ from routes.deepfake_audio import deepfake_audio_router
 from routes import video_broadcast
 from routes.nlp_analysis import nlp_router
 from routes.deepfake_detection import deepfake_router
-from routes.spot_game import bp as spot_game_bp
+from pydantic import BaseModel
+from datetime import datetime
+from typing import List, Optional
+
+spot_game_router = APIRouter(prefix="/api/spot-game")
+
+class SpotGamePair(BaseModel):
+    id: str
+    items: List[GameItem]
+
+class GameItem(BaseModel):
+    id: str
+    type: str
+    title: Optional[str] = None
+    url: Optional[str] = None
+    excerpt: Optional[str] = None
+
+@spot_game_router.get("/pair")
+async def get_pair():
+    try:
+        # Get a random real news article from your database
+        real_news = await news_fetcher.db_service.news_ref.where(
+            "is_fake", "==", False
+        ).limit(1).get()
+        
+        # Get a random fake news article
+        fake_news = await news_fetcher.db_service.news_ref.where(
+            "is_fake", "==", True
+        ).limit(1).get()
+
+        if not real_news or not fake_news:
+            raise HTTPException(status_code=404, detail="Not enough articles available")
+
+        # Randomize the order
+        import random
+        items = [
+            {
+                "id": real_news[0].id,
+                "type": "article",
+                "title": real_news[0].get("title"),
+                "excerpt": real_news[0].get("content")[:200] + "..."
+            },
+            {
+                "id": fake_news[0].id,
+                "type": "article",
+                "title": fake_news[0].get("title"),
+                "excerpt": fake_news[0].get("content")[:200] + "..."
+            }
+        ]
+        random.shuffle(items)
+
+        pair = {
+            "id": f"{real_news[0].id}-{fake_news[0].id}",
+            "items": items
+        }
+        return pair
+    except Exception as e:
+        print(f"Error fetching game pair: {e}")
+        raise HTTPException(status_code=500, detail="Error fetching game pair")
+
+@spot_game_router.post("/vote")
+async def submit_vote(vote_data: dict):
+    try:
+        # Store the vote in your database
+        await news_fetcher.db_service.votes_ref.add({
+            "pair_id": vote_data["pair_id"],
+            "choice": vote_data["choice"],
+            "timestamp": datetime.now()
+        })
+        return {"status": "success"}
+    except Exception as e:
+        print(f"Error submitting vote: {e}")
+        raise HTTPException(status_code=500, detail="Error submitting vote")
+
+@spot_game_router.get("/answer/{pair_id}")
+async def get_answer(pair_id: str):
+    try:
+        # Get the article IDs from the pair_id
+        real_id, fake_id = pair_id.split("-")
+        
+        # Get the articles
+        real_article = await news_fetcher.db_service.news_ref.document(real_id).get()
+        fake_article = await news_fetcher.db_service.news_ref.document(fake_id).get()
+
+        # Determine which index is the fake one
+        answer_index = 0 if fake_article.id == pair_id.split("-")[0] else 1
+
+        return {
+            "answer_index": answer_index,
+            "explanations": [
+                f"This article is {'fake' if i == answer_index else 'real'}: {fake_article.get('explanation') if i == answer_index else real_article.get('explanation')}"
+                for i in range(2)
+            ]
+        }
+    except Exception as e:
+        print(f"Error getting answer: {e}")
+        raise HTTPException(status_code=500, detail="Error getting answer")
 
 news_fetcher = NewsFetcher()
 
@@ -97,7 +193,8 @@ app.include_router(deepfake_audio_router, tags=["Audio Detection"])
 app.include_router(video_broadcast.router)
 app.include_router(nlp_router, prefix="/nlp", tags=["NLP Analysis"])
 app.include_router(deepfake_router, prefix="/deepfake", tags=["Deepfake Detection"])
-app.register_blueprint(spot_game_bp)
+app.include_router(spot_game_router, tags=["Spot Game"])
+
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the API"}
