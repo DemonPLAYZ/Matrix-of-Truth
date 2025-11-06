@@ -323,41 +323,6 @@ npm run dev
 # Load the matrix-extension folder in Chrome developer mode
 ```
 
-#### Cloud Deployment (Google Cloud Platform)
-
-```bash
-# Prerequisites
-- Google Cloud account with credits
-- gcloud CLI installed and configured
-- Docker installed locally
-
-# 1. Set up Google Cloud Project
-gcloud config set project YOUR_PROJECT_ID
-
-# 2. Enable required APIs
-gcloud services enable run.googleapis.com
-gcloud services enable cloudbuild.googleapis.com
-gcloud services enable secretmanager.googleapis.com
-gcloud services enable storage.googleapis.com
-gcloud services enable vision.googleapis.com
-gcloud services enable artifactregistry.googleapis.com
-
-# 3. Create Cloud Storage bucket for models
-gsutil mb -l asia-south1 gs://matrix-of-truth-models
-gsutil cp local_models/* gs://matrix-of-truth-models/
-
-# 4. Store secrets in Secret Manager
-gcloud secrets create GEMINI_API_KEY --data-file=-
-gcloud secrets create GOOGLE_API_KEY --data-file=-
-# ... (repeat for all environment variables)
-
-# 5. Deploy using Cloud Build
-gcloud builds submit --config cloudbuild.yaml
-
-# 6. Access deployed service
-gcloud run services describe matrix-backend --region=asia-south1
-```
-
 ### Key Components
 - **Backend API**: FastAPI-based microservices deployed on Cloud Run
 - **Frontend Dashboard**: React-based user interface hosted on Vercel
