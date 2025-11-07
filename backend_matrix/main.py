@@ -18,6 +18,7 @@ from routes.deepfake_audio import deepfake_audio_router
 from routes import video_broadcast
 from routes.nlp_analysis import nlp_router
 from routes.deepfake_detection import deepfake_router
+# from routes.scam_alerts import scam_router  # Scam alerts are now hardcoded in frontend
 
 news_fetcher = NewsFetcher()
 
@@ -70,6 +71,12 @@ async def lifespan(app: FastAPI):
     print("\nScheduling news fetching job...")
     scheduler.add_job(fetch_and_broadcast_news, 'interval', seconds=90)
     # await fetch_and_broadcast_news()
+    
+    # Scam alerts are now hardcoded in the frontend, so we don't need to fetch them
+    # print("Scheduling scam alerts fetching job (daily)...")
+    # scheduler.add_job(fetch_scam_alerts, 'interval', hours=24)
+    # await fetch_scam_alerts()
+    
     scheduler.start()
     
     print("\n" + "="*60)
@@ -104,6 +111,7 @@ app.include_router(deepfake_audio_router, tags=["Audio Detection"])
 app.include_router(video_broadcast.router)
 app.include_router(nlp_router, prefix="/nlp", tags=["NLP Analysis"])
 app.include_router(deepfake_router, prefix="/deepfake", tags=["Deepfake Detection"])
+# app.include_router(scam_router, tags=["Scam Alerts"])  # Scam alerts are now hardcoded in frontend
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the API"}

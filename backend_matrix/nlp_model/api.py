@@ -111,7 +111,7 @@ def generate_knowledge_graph_viz(text):
     is_fake = prediction == "FAKE"
     
     # Update knowledge graph
-    kg_builder.update_knowledge_graph(text, not is_fake, nlp)
+    #kg_builder.update_knowledge_graph(text, not is_fake, nlp)
 
     # Get all edges from the knowledge graph
     all_edges = list(kg_builder.knowledge_graph.edges())
@@ -243,7 +243,7 @@ async def analyze_news(news_input: NewsInput):
     kg_prediction, kg_confidence = predict_with_knowledge_graph(news_input.text, knowledge_graph, nlp)
     
     # Update knowledge graph
-    update_knowledge_graph(news_input.text, ml_prediction == "REAL", knowledge_graph, nlp, save=True, push_to_hf=False)
+    #update_knowledge_graph(news_input.text, ml_prediction == "REAL", knowledge_graph, nlp, save=True, push_to_hf=False)
     
     # Get Gemini analysis with retries
     max_retries = 10

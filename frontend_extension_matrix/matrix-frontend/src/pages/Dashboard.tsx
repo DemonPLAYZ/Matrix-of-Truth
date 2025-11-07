@@ -4,6 +4,7 @@ import UserInput from "@/components/UserInput";
 import Navbar from "@/components/navbar";
 import DeepfakeDetection from "@/components/DeepfakeDetection";
 import NLP from "@/components/NLP";
+import ScamAlerts from "@/components/ScamAlerts";
 import { motion } from "framer-motion";
 
 export default function Dashboard() {
@@ -79,7 +80,7 @@ export default function Dashboard() {
           </motion.p>
           
           <Tabs defaultValue="fact-checker" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 gap-2 mb-4 sm:mb-8 rounded-lg h-auto bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-2">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-2 mb-4 sm:mb-8 rounded-lg h-auto bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-2">
               <TabsTrigger
                 value="fact-checker"
                 className="p-2 sm:p-3 text-xs sm:text-sm lg:text-base bg-slate-800/70 text-white hover:bg-red-600/20 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-orange-600 transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
@@ -108,6 +109,13 @@ export default function Dashboard() {
                 <span className="hidden sm:inline">Live News Monitor</span>
                 <span className="sm:hidden">News</span>
               </TabsTrigger>
+              <TabsTrigger
+                value="scam-alerts"
+                className="p-2 sm:p-3 text-xs sm:text-sm lg:text-base bg-slate-800/70 text-white hover:bg-purple-600/20 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 transition-all duration-300 whitespace-nowrap overflow-hidden text-ellipsis"
+              >
+                <span className="hidden sm:inline">Scam Alerts</span>
+                <span className="sm:hidden">Scams</span>
+              </TabsTrigger>
             </TabsList>
 
             <div className="mt-4">
@@ -122,6 +130,9 @@ export default function Dashboard() {
               </TabsContent>
               <TabsContent value="realtime-news" className="bg-slate-800/30 backdrop-blur-sm rounded-lg border border-slate-700 p-3 sm:p-6">
                 <RealtimeNews />
+              </TabsContent>
+              <TabsContent value="scam-alerts" className="bg-slate-800/30 backdrop-blur-sm rounded-lg border border-slate-700 p-3 sm:p-6">
+                <ScamAlerts />
               </TabsContent>
             </div>
           </Tabs>
