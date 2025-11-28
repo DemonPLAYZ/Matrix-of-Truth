@@ -13,9 +13,9 @@ def check_credentials():
     print()
     
     # Check for GOOGLE_APPLICATION_CREDENTIALS
-    creds_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+    creds_env = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
     
-    if not creds_path:
+    if not creds_env:
         print("❌ GOOGLE_APPLICATION_CREDENTIALS is NOT set")
         print()
         print("To fix this, run one of these commands:")
@@ -31,39 +31,60 @@ def check_credentials():
         print()
         return False
     
-    print("✅ GOOGLE_APPLICATION_CREDENTIALS is set")
-    print(f"   Path: {creds_path}")
-    print()
-    
-    # Check if file exists
-    if not os.path.exists(creds_path):
-        print(f"❌ Credentials file NOT FOUND at: {creds_path}")
+    # Check if it's JSON content
+    if creds_env.strip().startswith('{'):
+        print("✅ GOOGLE_APPLICATION_CREDENTIALS is set (JSON content detected)")
         print()
-        print("Please verify:")
-        print("  1. The file path is correct")
-        print("  2. The file exists at that location")
-        print("  3. You have permission to read the file")
-        print()
-        return False
-    
-    print("✅ Credentials file exists")
-    print()
-    
-    # Check if file is readable
-    try:
-        with open(creds_path, 'r') as f:
-            content = f.read()
-            if '"type": "service_account"' in content or '"private_key"' in content:
-                print("✅ Credentials file appears to be valid JSON")
+        
+        try:
+            import json
+            content = json.loads(creds_env)
+            if "type" in content and content["type"] == "service_account":
+                print("✅ Credentials JSON appears to be valid service account key")
                 print()
             else:
-                print("⚠️  Credentials file might not be a valid service account key")
-                print("   Make sure you downloaded the JSON key file from Google Cloud")
+                print("⚠️  Credentials JSON might not be a valid service account key")
                 print()
-    except Exception as e:
-        print(f"❌ Cannot read credentials file: {e}")
+        except json.JSONDecodeError as e:
+            print(f"❌ Invalid JSON in GOOGLE_APPLICATION_CREDENTIALS: {e}")
+            print()
+            return False
+            
+    else:
+        # It's a file path
+        print("✅ GOOGLE_APPLICATION_CREDENTIALS is set")
+        print(f"   Path: {creds_env}")
         print()
-        return False
+        
+        # Check if file exists
+        if not os.path.exists(creds_env):
+            print(f"❌ Credentials file NOT FOUND at: {creds_env}")
+            print()
+            print("Please verify:")
+            print("  1. The file path is correct")
+            print("  2. The file exists at that location")
+            print("  3. You have permission to read the file")
+            print()
+            return False
+        
+        print("✅ Credentials file exists")
+        print()
+        
+        # Check if file is readable
+        try:
+            with open(creds_env, 'r') as f:
+                content = f.read()
+                if '"type": "service_account"' in content or '"private_key"' in content:
+                    print("✅ Credentials file appears to be valid JSON")
+                    print()
+                else:
+                    print("⚠️  Credentials file might not be a valid service account key")
+                    print("   Make sure you downloaded the JSON key file from Google Cloud")
+                    print()
+        except Exception as e:
+            print(f"❌ Cannot read credentials file: {e}")
+            print()
+            return False
     
     # Try to import google-cloud-vision
     print("Checking Python packages...")
