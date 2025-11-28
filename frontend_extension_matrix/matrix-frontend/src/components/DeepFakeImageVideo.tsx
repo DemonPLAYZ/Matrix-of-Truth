@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { config } from "../config";
 
 interface ImageAnalysisResult {
   "CNN Prediction": "Real" | "Fake";
@@ -75,8 +76,8 @@ const DeepFakeImageVideo = () => {
 
       const endpoint =
         fileType === "image"
-          ? `${import.meta.env.VITE_API_URL}/deepfake/image`
-          : `${import.meta.env.VITE_API_URL}/deepfake/video`;
+          ? `${config.apiUrl}/deepfake/image`
+          : `${config.apiUrl}/deepfake/video`;
       const response = await fetch(endpoint, {
         method: "POST",
         body: formData,
@@ -140,11 +141,10 @@ const DeepFakeImageVideo = () => {
                     setFileType("image");
                     resetForm();
                   }}
-                  className={`px-4 py-2 rounded-md transition-colors ${
-                    fileType === "image"
+                  className={`px-4 py-2 rounded-md transition-colors ${fileType === "image"
                       ? "bg-blue-600 text-white"
                       : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  }`}
+                    }`}
                 >
                   Image
                 </button>
@@ -153,11 +153,10 @@ const DeepFakeImageVideo = () => {
                     setFileType("video");
                     resetForm();
                   }}
-                  className={`px-4 py-2 rounded-md transition-colors ${
-                    fileType === "video"
+                  className={`px-4 py-2 rounded-md transition-colors ${fileType === "video"
                       ? "bg-blue-600 text-white"
                       : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  }`}
+                    }`}
                 >
                   Video
                 </button>
@@ -208,11 +207,10 @@ const DeepFakeImageVideo = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={!file || isLoading}
-                  className={`px-6 py-2 rounded-md bg-blue-600 text-white font-medium flex items-center justify-center ${
-                    !file || isLoading
+                  className={`px-6 py-2 rounded-md bg-blue-600 text-white font-medium flex items-center justify-center ${!file || isLoading
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:bg-blue-700"
-                  }`}
+                    }`}
                 >
                   {isLoading ? (
                     <>
@@ -300,11 +298,10 @@ const DeepFakeImageVideo = () => {
                       CNN Prediction
                     </h3>
                     <div
-                      className={`text-xl font-bold ${
-                        result["CNN Prediction"] === "Real"
+                      className={`text-xl font-bold ${result["CNN Prediction"] === "Real"
                           ? "text-green-400"
                           : "text-red-400"
-                      }`}
+                        }`}
                     >
                       {result["CNN Prediction"] || "N/A"}
                     </div>
@@ -315,11 +312,10 @@ const DeepFakeImageVideo = () => {
                       Noise Pattern Analysis
                     </h3>
                     <div
-                      className={`text-xl font-bold ${
-                        result["Noise Pattern Analysis"] === "Real"
+                      className={`text-xl font-bold ${result["Noise Pattern Analysis"] === "Real"
                           ? "text-green-400"
                           : "text-red-400"
-                      }`}
+                        }`}
                     >
                       {result["Noise Pattern Analysis"] || "N/A"}
                     </div>
@@ -352,7 +348,7 @@ const DeepFakeImageVideo = () => {
                         <p className="text-gray-400 text-sm">Vertical</p>
                         <p className="text-lg">
                           {typeof result["Symmetry Analysis"]?.["Vertical Symmetry"] ===
-                          "number"
+                            "number"
                             ? result["Symmetry Analysis"]["Vertical Symmetry"].toFixed(2)
                             : "N/A"}
                         </p>
@@ -361,7 +357,7 @@ const DeepFakeImageVideo = () => {
                         <p className="text-gray-400 text-sm">Horizontal</p>
                         <p className="text-lg">
                           {typeof result["Symmetry Analysis"]?.["Horizontal Symmetry"] ===
-                          "number"
+                            "number"
                             ? result["Symmetry Analysis"]["Horizontal Symmetry"].toFixed(2)
                             : "N/A"}
                         </p>
@@ -462,11 +458,10 @@ const DeepFakeImageVideo = () => {
               </h3>
               <div className="flex items-center">
                 <div
-                  className={`text-2xl font-bold ${
-                    result["Final Prediction"] === "Real"
+                  className={`text-2xl font-bold ${result["Final Prediction"] === "Real"
                       ? "text-green-400"
                       : "text-red-400"
-                  }`}
+                    }`}
                 >
                   This {fileType} is {result["Final Prediction"]?.toLowerCase() || "unknown"}
                 </div>

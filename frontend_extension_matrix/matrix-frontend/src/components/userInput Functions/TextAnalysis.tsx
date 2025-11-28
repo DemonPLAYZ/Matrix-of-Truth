@@ -10,6 +10,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '../ui/dialog';
+import { config } from "../../config";
 
 type Analysis = {
     fact_check_result: {
@@ -31,10 +32,10 @@ type Analysis = {
                 transparency_score: number,
                 expertise_level: number,
                 additional_metrics: {
-                  citation_score: number,
-                  peer_recognition: number,
+                    citation_score: number,
+                    peer_recognition: number,
                 }
-              }[];
+            }[];
         };
     };
     sources: string[];
@@ -52,7 +53,7 @@ export default function TextAnalysis() {
         setLoading(true);
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/get-fc-text`, {
+            const response = await fetch(`${config.apiUrl}/get-fc-text`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -108,10 +109,10 @@ export default function TextAnalysis() {
                         <CardContent>
                             <div className="space-y-2">
                                 <p className={`text-sm font-semibold ${analysis.fact_check_result.detailed_analysis.overall_analysis.truth_score >= 0.75
-                                        ? "text-emerald-400"
-                                        : analysis.fact_check_result.detailed_analysis.overall_analysis.truth_score < 0.75
-                                            ? "text-amber-400"
-                                            : "text-rose-400"
+                                    ? "text-emerald-400"
+                                    : analysis.fact_check_result.detailed_analysis.overall_analysis.truth_score < 0.75
+                                        ? "text-amber-400"
+                                        : "text-rose-400"
                                     }`}>
                                     Truth Score: {analysis.fact_check_result.detailed_analysis.overall_analysis.truth_score}
                                 </p>
@@ -188,73 +189,72 @@ export default function TextAnalysis() {
                                 </div> */}
 
                                 <div>
-                                    <button 
-                                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors flex justify-between items-center"
-                                    onClick={() => setShowSources(!showSources)}
+                                    <button
+                                        className="w-full px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors flex justify-between items-center"
+                                        onClick={() => setShowSources(!showSources)}
                                     >
-                                    <span>{showSources ? 'Hide Sources' : 'Show Sources'}</span>
-                                    <span>{showSources ? '▲' : '▼'}</span>
+                                        <span>{showSources ? 'Hide Sources' : 'Show Sources'}</span>
+                                        <span>{showSources ? '▲' : '▼'}</span>
                                     </button>
-                                    
+
                                     {showSources && (
-                                    <div className="bg-gray-800 p-4 rounded-md mt-2">
-                                        <h4 className="text-emerald-400 font-medium mb-2">Sources Analysis</h4>
-                                        <div className="overflow-x-auto">
-                                        <table className="w-full text-sm text-left text-gray-300">
-                                            <thead className="text-xs text-gray-400 uppercase bg-gray-700">
-                                            <tr>
-                                                <th className="px-4 py-2">Source</th>
-                                                <th className="px-4 py-2">Credibility</th>
-                                                <th className="px-4 py-2">Fact Checking</th>
-                                                <th className="px-4 py-2">Transparency</th>
-                                                <th className="px-4 py-2">Expertise</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {analysis.fact_check_result.detailed_analysis.source_analysis && analysis.fact_check_result.detailed_analysis.source_analysis.map((source, index) => (
-                                                <tr key={index} className="border-b border-gray-700 hover:bg-gray-700">
-                                                <td className="px-4 py-2">
-                                                    <a 
-                                                    href={analysis.sources[index] || "#"}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer" 
-                                                    className="text-blue-400 hover:underline"
-                                                    >
-                                                    {source.source}
-                                                    </a>
-                                                </td>
-                                                <td className={`px-4 py-2 ${
-                                                    source.credibility_score > 0.7 ? "text-emerald-400" : 
-                                                    source.credibility_score > 0.4 ? "text-amber-400" : "text-rose-400"
-                                                }`}>
-                                                    {source.credibility_score.toFixed(2)}
-                                                </td>
-                                                <td className="px-4 py-2">{source.fact_checking_history.toFixed(2)}</td>
-                                                <td className="px-4 py-2">{source.transparency_score.toFixed(2)}</td>
-                                                <td className="px-4 py-2">{source.expertise_level.toFixed(2)}</td>
-                                                </tr>
-                                            ))}
-                                            </tbody>
-                                        </table>
+                                        <div className="bg-gray-800 p-4 rounded-md mt-2">
+                                            <h4 className="text-emerald-400 font-medium mb-2">Sources Analysis</h4>
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full text-sm text-left text-gray-300">
+                                                    <thead className="text-xs text-gray-400 uppercase bg-gray-700">
+                                                        <tr>
+                                                            <th className="px-4 py-2">Source</th>
+                                                            <th className="px-4 py-2">Credibility</th>
+                                                            <th className="px-4 py-2">Fact Checking</th>
+                                                            <th className="px-4 py-2">Transparency</th>
+                                                            <th className="px-4 py-2">Expertise</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {analysis.fact_check_result.detailed_analysis.source_analysis && analysis.fact_check_result.detailed_analysis.source_analysis.map((source, index) => (
+                                                            <tr key={index} className="border-b border-gray-700 hover:bg-gray-700">
+                                                                <td className="px-4 py-2">
+                                                                    <a
+                                                                        href={analysis.sources[index] || "#"}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="text-blue-400 hover:underline"
+                                                                    >
+                                                                        {source.source}
+                                                                    </a>
+                                                                </td>
+                                                                <td className={`px-4 py-2 ${source.credibility_score > 0.7 ? "text-emerald-400" :
+                                                                    source.credibility_score > 0.4 ? "text-amber-400" : "text-rose-400"
+                                                                    }`}>
+                                                                    {source.credibility_score.toFixed(2)}
+                                                                </td>
+                                                                <td className="px-4 py-2">{source.fact_checking_history.toFixed(2)}</td>
+                                                                <td className="px-4 py-2">{source.transparency_score.toFixed(2)}</td>
+                                                                <td className="px-4 py-2">{source.expertise_level.toFixed(2)}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div className="mt-4">
+                                                <h4 className="text-emerald-400 font-medium mb-2">Source URLs</h4>
+                                                <ul className="list-disc pl-4 text-gray-300">
+                                                    {analysis.sources?.map((url, index) => (
+                                                        <li key={index} className="mb-2">
+                                                            <a
+                                                                href={url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-blue-400 hover:underline"
+                                                            >
+                                                                {url}
+                                                            </a>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
                                         </div>
-                                        <div className="mt-4">
-                                        <h4 className="text-emerald-400 font-medium mb-2">Source URLs</h4>
-                                        <ul className="list-disc pl-4 text-gray-300">
-                                            {analysis.sources?.map((url, index) => (
-                                            <li key={index} className="mb-2">
-                                                <a 
-                                                href={url}
-                                                target="_blank"
-                                                rel="noopener noreferrer" 
-                                                className="text-blue-400 hover:underline"
-                                                >
-                                                {url}
-                                                </a>
-                                            </li>
-                                            ))}
-                                        </ul>
-                                        </div>
-                                    </div>
                                     )}
                                 </div>
 
@@ -266,10 +266,10 @@ export default function TextAnalysis() {
                                                 <div key={index} className="bg-gray-800 p-4 rounded-md">
                                                     <p className="font-medium mb-2">{claim.claim}</p>
                                                     <p className={`text-sm ${claim.verification_status === "Verified"
-                                                            ? "text-emerald-400"
-                                                            : claim.verification_status === "Partially Verified"
-                                                                ? "text-amber-400"
-                                                                : "text-rose-400"
+                                                        ? "text-emerald-400"
+                                                        : claim.verification_status === "Partially Verified"
+                                                            ? "text-amber-400"
+                                                            : "text-rose-400"
                                                         }`}>
                                                         Status: {claim.verification_status} (Confidence: {claim.confidence_level})
                                                     </p>

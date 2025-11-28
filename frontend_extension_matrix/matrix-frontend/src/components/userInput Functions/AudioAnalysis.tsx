@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '../ui/button';
 import { Loader2 } from 'lucide-react';
+import { config } from "../../config";
 
 export default function AudioAnalysis() {
   const [file, setFile] = useState<File | null>(null);
@@ -17,7 +18,7 @@ export default function AudioAnalysis() {
 
   const formatAnalysisText = (text: string) => {
     let parts = text.split('**');
-    
+
     return parts.map((part, index) => {
       if (index % 2 === 1) {
         return (
@@ -26,7 +27,7 @@ export default function AudioAnalysis() {
           </h3>
         );
       }
-      
+
       const subParts = part.split('*');
       return subParts.map((subPart, subIndex) => {
         if (subIndex % 2 === 1) {
@@ -50,12 +51,12 @@ export default function AudioAnalysis() {
 
     setLoading(true);
     setAnalysis('');
-    
+
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/analyze-audio`, {
+      const response = await fetch(`${config.apiUrl}/analyze-audio`, {
         method: 'POST',
         body: formData,
       });

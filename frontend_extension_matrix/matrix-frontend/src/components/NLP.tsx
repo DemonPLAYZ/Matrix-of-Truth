@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { config } from "../config";
 
 // Entity type representing named entities extracted from text
 interface Entity {
@@ -97,7 +98,7 @@ const NLP: React.FC = () => {
     try {
       const payload: NewsInput = { text: inputText };
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/nlp/analyze`,
+        `${config.apiUrl}/nlp/analyze`,
         {
           method: "POST",
           headers: {
@@ -169,17 +170,15 @@ const NLP: React.FC = () => {
             </p>
             <div className="mt-2 h-4 bg-gray-200 rounded-full overflow-hidden">
               <div
-                className={`h-full ${
-                  model.prediction.toLowerCase().includes("fake")
-                    ? "bg-red-500"
-                    : "bg-green-500"
-                }`}
+                className={`h-full ${model.prediction.toLowerCase().includes("fake")
+                  ? "bg-red-500"
+                  : "bg-green-500"
+                  }`}
                 style={{
-                  width: `${
-                    typeof model.confidence === "number"
-                      ? model.confidence
-                      : parseFloat(model.confidence)
-                  }%`,
+                  width: `${typeof model.confidence === "number"
+                    ? model.confidence
+                    : parseFloat(model.confidence)
+                    }%`,
                 }}
               ></div>
             </div>
@@ -585,11 +584,10 @@ const NLP: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full py-3 px-4 rounded-md text-white font-medium ${
-              isLoading
-                ? "bg-blue-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
-            }`}
+            className={`w-full py-3 px-4 rounded-md text-white font-medium ${isLoading
+              ? "bg-blue-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+              }`}
           >
             {isLoading ? "Analyzing..." : "Analyze Text"}
           </button>

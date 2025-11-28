@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { config } from "../config";
 
 export default function AudioDeepfakeDetection() {
     const [file, setFile] = useState<File | null>(null);
-    const [result, setResult] = useState<{prediction: string, confidence: number} | null>(null);
+    const [result, setResult] = useState<{ prediction: string, confidence: number } | null>(null);
     const [loading, setLoading] = useState(false);
-    const api_url = import.meta.env.VITE_API_URL;
+    const api_url = config.apiUrl;
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -47,7 +48,7 @@ export default function AudioDeepfakeDetection() {
                         <h2 className="text-2xl font-bold text-center text-white">
                             Audio Deepfake Detection
                         </h2>
-                        
+
                         <div className="flex flex-col items-center space-y-4">
                             <input
                                 type="file"
@@ -61,8 +62,8 @@ export default function AudioDeepfakeDetection() {
                                     hover:file:bg-gray-700
                                     cursor-pointer"
                             />
-                            
-                            <Button 
+
+                            <Button
                                 onClick={handleSubmit}
                                 disabled={!file || loading}
                                 className="w-full max-w-xs bg-blue-600 hover:bg-blue-700"

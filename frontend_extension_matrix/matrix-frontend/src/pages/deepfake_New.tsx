@@ -7,6 +7,7 @@ import { Upload, AlertCircle, Eye, Shield } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import Navbar from "@/components/navbar";
+import { config } from "../config";
 
 interface DetectionResult {
   CNN_Prediction: string;
@@ -27,12 +28,12 @@ export default function DeepfakeDetection() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fileType, setFileType] = useState<"image" | "video">("image");
-  const api_url = import.meta.env.VITE_API_URL;
+  const api_url = config.apiUrl;
 
   // Enhanced Matrix Rain (same as Home page)
   const MatrixRain = () => {
     const characters = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    
+
     return (
       <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-10">
         {[...Array(30)].map((_, i) => (
@@ -134,7 +135,7 @@ export default function DeepfakeDetection() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative">
         {/* Matrix Rain Background */}
         <MatrixRain />
-        
+
         <div className="container mx-auto p-8 pt-20 relative z-10">
           {/* Header */}
           <motion.div
@@ -332,12 +333,12 @@ export default function DeepfakeDetection() {
                         <h3 className="font-semibold text-orange-400 mb-3">CNN Analysis</h3>
                         <p className="text-slate-200">{result.CNN_Prediction}</p>
                       </div>
-                      
+
                       <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-600">
                         <h3 className="font-semibold text-yellow-400 mb-3">Metadata Analysis</h3>
                         <p className="text-slate-200">{result.Metadata_Analysis}</p>
                       </div>
-                      
+
                       <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-600">
                         <h3 className="font-semibold text-red-400 mb-3">Noise Pattern Analysis</h3>
                         <p className="text-slate-200">{result.Noise_Pattern_Analysis}</p>

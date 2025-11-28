@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
+import { config } from "../config";
 
 interface WebEntity {
   description?: string;
@@ -71,7 +72,7 @@ const ReverseImageSearch = () => {
       formData.append("file", file);
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/reverse-image-search`,
+        `${config.apiUrl}/reverse-image-search`,
         {
           method: "POST",
           body: formData,
@@ -230,11 +231,10 @@ const ReverseImageSearch = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={!file || isLoading}
-                  className={`flex-1 px-6 py-3 rounded-lg font-medium flex items-center justify-center transition-all duration-300 ${
-                    !file || isLoading
-                      ? "bg-slate-700 text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
-                  }`}
+                  className={`flex-1 px-6 py-3 rounded-lg font-medium flex items-center justify-center transition-all duration-300 ${!file || isLoading
+                    ? "bg-slate-700 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
+                    }`}
                 >
                   {isLoading ? (
                     <>
