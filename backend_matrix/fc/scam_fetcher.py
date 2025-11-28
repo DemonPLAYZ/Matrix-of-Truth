@@ -4,6 +4,7 @@ from typing import List, Dict, Any
 import logging
 from google import genai
 from google.genai import types
+from db.database_service import DatabaseService
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,7 @@ class ScamFetcher:
         else:
             self.client = None
             logger.warning("GEMINI_API_KEY not set")
+        self.db_service = DatabaseService()
         
     def fetch_latest_scams(self) -> List[Dict[str, Any]]:
         """Fetch latest scam news articles using Gemini with Google Search."""
@@ -61,7 +63,7 @@ URL: [Article URL if available, otherwise search query]
 ---"""
 
                 response = self.client.models.generate_content(
-                    model="gemini-2.0-flash-exp",
+                    model="gemini-flash-latest",
                     contents=prompt,
                     config=config,
                 )
@@ -205,3 +207,28 @@ URL: [Article URL if available, otherwise search query]
             })
         
         return categorized
+
+    def process_single_scam(self):
+        scam = self.db_service.get_unprocessed_scam()
+
+        if not scam:
+            # Fetch new scams
+            new_scams = self.fetch_latest_scams()
+            if new_scams:
+                self.db_service.store_scams_queue(new_scams)
+                return self.process_single_scam()
+            
+            return {'status': 'refresh', 'content': 'Refreshing scam database'}
+
+        # Check if already in 'newest' to avoid re-broadcasting
+        result = self.db_service.mark_scam_processed(scam['id'], scam)
+        
+        if result:
+            # It was added (not duplicate)
+            return {
+                "status": "success",
+                "content": scam
+            }
+        else:
+            # Duplicate, skip and try next
+            return self.process_single_scam()

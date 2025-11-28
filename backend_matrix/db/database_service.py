@@ -7,6 +7,8 @@ class DatabaseService:
         self.db = db
         self.news_ref = self.db.collection('news')
         self.factcheck_ref = self.db.collection('factcheck')
+        self.scams_queue_ref = self.db.collection('scams_queue')
+        self.scams_ref = self.db.collection('newest')
     
     def store_news(self, news_list: List[Dict]):
         batch = self.db.batch()
@@ -25,6 +27,33 @@ class DatabaseService:
         query = self.news_ref.where('processed', '==', False).limit(1)
         docs = query.get()
         return next((doc.to_dict() | {'id': doc.id} for doc in docs), None)
+
+    def store_scams_queue(self, scams_list: List[Dict]):
+        batch = self.db.batch()
+        for scam in scams_list:
+            doc_ref = self.scams_queue_ref.document()
+            scam['processed'] = False
+            batch.set(doc_ref, scam)
+        batch.commit()
+
+    def get_unprocessed_scam(self):
+        query = self.scams_queue_ref.where('processed', '==', False).limit(1)
+        docs = query.get()
+        return next((doc.to_dict() | {'id': doc.id} for doc in docs), None)
+
+    def mark_scam_processed(self, scam_id: str, scam_data: Dict):
+        self.scams_queue_ref.document(scam_id).update({'processed': True})
+        
+        # Remove 'processed' and 'id' fields before adding to public collection
+        public_data = scam_data.copy()
+        public_data.pop('processed', None)
+        public_data.pop('id', None)
+        
+        # Check for duplicates in 'newest'
+        existing = self.scams_ref.where('title', '==', public_data['title']).limit(1).stream()
+        if not list(existing):
+            return self.scams_ref.add(public_data)
+        return None
         
     # def get_all_news_with_factchecks(self):
     #     news_docs = self.news_ref.get()

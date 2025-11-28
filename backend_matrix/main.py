@@ -5,7 +5,9 @@ from routes.news_fetch import news_router
 from routes.user_inputs import input_router
 import nest_asyncio
 nest_asyncio.apply()
+import asyncio
 from fc.newsfetcher import NewsFetcher
+from fc.scam_fetcher import ScamFetcher
 import os
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -18,9 +20,10 @@ from routes.deepfake_audio import deepfake_audio_router
 from routes import video_broadcast
 from routes.nlp_analysis import nlp_router
 from routes.deepfake_detection import deepfake_router
-# from routes.scam_alerts import scam_router  # Scam alerts are now hardcoded in frontend
+from routes.scam_alerts import scam_router  
 
 news_fetcher = NewsFetcher()
+scam_fetcher = ScamFetcher()
 
 async def fetch_and_broadcast_news():
     try:
@@ -35,6 +38,21 @@ async def fetch_and_broadcast_news():
             
     except Exception as e:
         print(f"Error in fetch_and_broadcast_news: {e}")
+
+async def fetch_scam_alerts():
+    try:
+        loop = asyncio.get_running_loop()
+        scam_data = await loop.run_in_executor(None, scam_fetcher.process_single_scam)
+
+        if scam_data["status"] == "refresh":
+            pusher_client.trigger('scam-channel', 'refresh-scam', {
+                'message': 'Refreshing scam database'
+            })
+        elif scam_data["status"] == "success":
+            pusher_client.trigger('scam-channel', 'fact-check', scam_data["content"])
+            
+    except Exception as e:
+        print(f"Error in fetch_and_broadcast_scam: {e}")
 
 scheduler = AsyncIOScheduler()
 
@@ -72,9 +90,8 @@ async def lifespan(app: FastAPI):
     scheduler.add_job(fetch_and_broadcast_news, 'interval', seconds=90)
     # await fetch_and_broadcast_news()
     
-    # Scam alerts are now hardcoded in the frontend, so we don't need to fetch them
-    # print("Scheduling scam alerts fetching job (daily)...")
-    # scheduler.add_job(fetch_scam_alerts, 'interval', hours=24)
+    print("Scheduling scam alerts fetching job (daily)...")
+    scheduler.add_job(fetch_scam_alerts, 'interval', seconds=120)
     # await fetch_scam_alerts()
     
     scheduler.start()
@@ -111,7 +128,7 @@ app.include_router(deepfake_audio_router, tags=["Audio Detection"])
 app.include_router(video_broadcast.router)
 app.include_router(nlp_router, prefix="/nlp", tags=["NLP Analysis"])
 app.include_router(deepfake_router, prefix="/deepfake", tags=["Deepfake Detection"])
-# app.include_router(scam_router, tags=["Scam Alerts"])  # Scam alerts are now hardcoded in frontend
+app.include_router(scam_router, tags=["Scam Alerts"]) 
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the API"}
