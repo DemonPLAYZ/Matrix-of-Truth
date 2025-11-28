@@ -22,3 +22,6 @@ steps:
 
 images:
   - 'gcr.io/$PROJECT_ID/matrix-frontend'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
