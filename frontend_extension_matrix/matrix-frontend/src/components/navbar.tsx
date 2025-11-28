@@ -142,12 +142,6 @@ export default function Navbar() {
                 Dashboard
               </Link>
               <Link
-                to="/reverse-search"
-                className="text-white hover:text-fuchsia-400 transition-colors font-medium"
-              >
-                Reverse Search
-              </Link>
-              <Link
                 to="/about"
                 className="text-white hover:text-fuchsia-400 transition-colors font-medium"
               >

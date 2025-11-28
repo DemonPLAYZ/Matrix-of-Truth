@@ -569,7 +569,7 @@ const NLP: React.FC = () => {
             <textarea
               id="text-input"
               rows={6}
-              className="bg-zinc-800 w-full px-4 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-zinc-800 text-white w-full px-4 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Paste news article or statement here..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
