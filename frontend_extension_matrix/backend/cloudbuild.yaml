@@ -6,7 +6,7 @@ steps:
       - '-t'
       - 'asia-south1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/matrix-extension-backend:latest'
       - '.'
-    dir: '.'
+    dir: 'frontend_extension_matrix/backend'
 
   # Push Docker image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
