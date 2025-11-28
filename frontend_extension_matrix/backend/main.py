@@ -25,7 +25,7 @@ app.add_middleware(
 )
 
 # Configure Gemini API
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+genai.configure(api_key=os.getenv("EXT_GEMINI_API"))
 
 def create_fact_check_model():
     """Create and configure the Gemini model for fact checking"""
@@ -196,4 +196,5 @@ async def health_check():
     return {"status": "healthy", "service": "fact-checker-api"}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", 8080))
+    uvicorn.run(app, host="0.0.0.0", port=port)

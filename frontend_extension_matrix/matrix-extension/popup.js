@@ -1,5 +1,7 @@
 // popup.js for Python extension
 
+window.extensionConfig = { apiUrl: 'https://matrix-extension-backend-221199009475.asia-south1.run.app' };
+
 document.addEventListener('DOMContentLoaded', function() {
     const checkFactsBtn = document.getElementById('checkFactsBtn');
     const statusDiv = document.getElementById('status');
