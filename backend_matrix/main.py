@@ -12,7 +12,6 @@ import os
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from routes.user_broadcast import router
-from pusher_api import pusher_client
 from routes.video_analysis import video_router
 from routes.image_analysis import image_router
 from routes.audio_analysis import audio_router
@@ -28,13 +27,7 @@ scam_fetcher = ScamFetcher()
 async def fetch_and_broadcast_news():
     try:
         news_data = news_fetcher.process_single_news()
-
-        if news_data["status"] == "refresh":
-            pusher_client.trigger('news-channel', 'refresh-news', {
-                'message': 'Refreshing news database'
-            })
-        elif news_data["status"] == "success":
-            pusher_client.trigger('news-channel', 'fact-check', news_data["content"])
+        # Frontend listens to Firestore directly, no need to broadcast via Pusher
             
     except Exception as e:
         print(f"Error in fetch_and_broadcast_news: {e}")
@@ -43,13 +36,7 @@ async def fetch_scam_alerts():
     try:
         loop = asyncio.get_running_loop()
         scam_data = await loop.run_in_executor(None, scam_fetcher.process_single_scam)
-
-        if scam_data["status"] == "refresh":
-            pusher_client.trigger('scam-channel', 'refresh-scam', {
-                'message': 'Refreshing scam database'
-            })
-        elif scam_data["status"] == "success":
-            pusher_client.trigger('scam-channel', 'fact-check', scam_data["content"])
+        # Frontend listens to Firestore directly, no need to broadcast via Pusher
             
     except Exception as e:
         print(f"Error in fetch_and_broadcast_scam: {e}")
@@ -87,11 +74,11 @@ async def lifespan(app: FastAPI):
         print("News database already initialized.")
     
     print("\nScheduling news fetching job...")
-    scheduler.add_job(fetch_and_broadcast_news, 'interval', seconds=90)
+    scheduler.add_job(fetch_and_broadcast_news, 'interval', seconds=300)
     # await fetch_and_broadcast_news()
     
     print("Scheduling scam alerts fetching job (daily)...")
-    scheduler.add_job(fetch_scam_alerts, 'interval', seconds=120)
+    scheduler.add_job(fetch_scam_alerts, 'interval', seconds=6000)
     # await fetch_scam_alerts()
     
     scheduler.start()

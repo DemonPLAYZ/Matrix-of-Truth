@@ -48,6 +48,14 @@ class DatabaseService:
         public_data = scam_data.copy()
         public_data.pop('processed', None)
         public_data.pop('id', None)
+
+        # Ensure timestamp exists (migration fix)
+        if 'timestamp' not in public_data:
+            if 'fetched_at' in public_data:
+                public_data['timestamp'] = public_data['fetched_at']
+            else:
+                from datetime import datetime
+                public_data['timestamp'] = datetime.now().isoformat()
         
         # Check for duplicates in 'newest'
         existing = self.scams_ref.where('title', '==', public_data['title']).limit(1).stream()

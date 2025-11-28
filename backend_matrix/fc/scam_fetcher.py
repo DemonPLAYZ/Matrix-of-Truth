@@ -145,7 +145,7 @@ URL: [Article URL if available, otherwise search query]
                     'url': scam_data['url'],
                     'source': scam_data['source'] if scam_data['source'] else 'News Article via Gemini Search',
                     'warning': scam_data['warning'] if scam_data['warning'] else 'Stay vigilant and verify before taking action.',
-                    'fetched_at': scam_data['fetched_at']
+                    'timestamp': scam_data['fetched_at']
                 })
         
         return scams

@@ -53,7 +53,8 @@ interface NewsObject {
   sources: string[];
 }
 
-import PusherClient from "pusher-js";
+import { collection, query, onSnapshot } from "firebase/firestore";
+import { db } from "../firebase";
 
 // Allows you to use Pusher inside Next.js "use client" components.
 export const RealtimeNews = () => {
@@ -63,38 +64,18 @@ export const RealtimeNews = () => {
   const [expandedClaims, setExpandedClaims] = useState<{
     [key: number]: boolean;
   }>({});
-  const api_url = import.meta.env.VITE_API_URL;
-  const pusherClient = new PusherClient(import.meta.env.VITE_PUSHER_KEY!, {
-    cluster: "ap2",
-  });
   useEffect(() => {
-    const fetchInitialNews = async () => {
-      try {
-        const response = await fetch(`${api_url}/all-news`);
-        const data = await response.json();
-        setNews([...data.content]);
-        // console.log("Initial news fetched:", data);
-        // setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching initial news:", error);
-      }
-    };
+    const q = query(collection(db, "factcheck"));
 
-    fetchInitialNews();
-  }, []);
-
-  useEffect(() => {
-    pusherClient.subscribe("news-channel");
-    pusherClient.bind("fact-check", (data: any) => {
-      setNews((prevNews) => {
-        const newsUpdated = [data, ...prevNews];
-        return newsUpdated;
-      });
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const newsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as NewsObject[];
+      setNews(newsData.reverse());
     });
 
-    return () => {
-      pusherClient.unsubscribe("news-channel");
-    };
+    return () => unsubscribe();
   }, []);
 
   return (
