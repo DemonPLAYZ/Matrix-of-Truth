@@ -18,7 +18,7 @@ steps:
       - '--image'
       - 'gcr.io/$PROJECT_ID/matrix-frontend'
       - '--region'
-      - 'us-central1'
+      - 'asia-south1'
       - '--allow-unauthenticated'
 
 images:
