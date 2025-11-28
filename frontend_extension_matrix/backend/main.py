@@ -106,20 +106,29 @@ async def fact_check(page_data: PageData):
         CONTENT:
         {content_to_analyze}
         
-        Please provide a fact-checking analysis with the following structure:
-        1. A brief summary of the overall factual accuracy (1-2 sentences)
-        2. Identify 3-5 specific claims made in the content
-        3. For each claim, provide:
-           - The claim statement
-           - An accuracy assessment (accurate, inaccurate, partially accurate, or unverifiable)
-           - A brief explanation with evidence
+        Return a JSON object with the following structure:
+        {{
+            "summary": "A brief summary of the overall factual accuracy (1-2 sentences)",
+            "claims": [
+                {{
+                    "statement": "The claim statement",
+                    "accuracy": "accurate/inaccurate/partially accurate/unverifiable",
+                    "explanation": "A brief explanation with evidence"
+                }},
+                ... (3-5 claims)
+            ]
+        }}
         """
         
         # Send message to Gemini
         response = chat.send_message(prompt)
         
         # Parse the response
-        analysis_result = json.loads(response.text)
+        try:
+            analysis_result = json.loads(response.text)
+        except json.JSONDecodeError as e:
+            print(f"Failed to parse JSON response: {response.text}")
+            raise HTTPException(status_code=500, detail=f"Failed to parse AI response: {str(e)}")
         
         # Add timestamp and metadata
         result = {
