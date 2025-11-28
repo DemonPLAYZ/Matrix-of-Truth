@@ -56,7 +56,6 @@ interface NewsObject {
 import { collection, query, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 
-// Allows you to use Pusher inside Next.js "use client" components.
 export const RealtimeNews = () => {
   //NewsObject state
   const [news, setNews] = useState<NewsObject[]>([]);
