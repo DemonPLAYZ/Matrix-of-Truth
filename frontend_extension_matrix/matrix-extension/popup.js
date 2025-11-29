@@ -1,16 +1,62 @@
 // popup.js for Python extension
 
-window.extensionConfig = { apiUrl: 'https://matrix-extension-backend-221199009475.asia-south1.run.app' };
+window.extensionConfig = { apiUrl: 'https://matrix-backend-221199009475.asia-south1.run.app' };
 
 document.addEventListener('DOMContentLoaded', function () {
   const checkFactsBtn = document.getElementById('checkFactsBtn');
   const statusDiv = document.getElementById('status');
   const resultsDiv = document.getElementById('results');
 
+  // Helper function to create collapsible sections
+  function createCollapsibleSection(title, contentElement, isOpen = false) {
+    const section = document.createElement('div');
+    section.className = 'collapsible-section';
+
+    const header = document.createElement('div');
+    header.className = `collapsible-header ${isOpen ? 'active' : ''}`;
+    header.innerHTML = `
+      <span>${title}</span>
+      <svg class="chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    `;
+
+    const content = document.createElement('div');
+    content.className = `collapsible-content ${isOpen ? 'open' : ''}`;
+
+    const inner = document.createElement('div');
+    inner.className = 'collapsible-inner';
+    inner.appendChild(contentElement);
+
+    content.appendChild(inner);
+
+    header.addEventListener('click', () => {
+      const isClosed = !content.classList.contains('open');
+      if (isClosed) {
+        content.classList.add('open');
+        header.classList.add('active');
+      } else {
+        content.classList.remove('open');
+        header.classList.remove('active');
+      }
+    });
+
+    section.appendChild(header);
+    section.appendChild(content);
+
+    return section;
+  }
+
   checkFactsBtn.addEventListener('click', async () => {
     // Update status and clear previous results
-    statusDiv.textContent = "Processing page...";
-    statusDiv.style.backgroundColor = "#f0f8ff";
+    statusDiv.style.display = 'block';
+    statusDiv.innerHTML = `
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        <span>Analyzing content...</span>
+      </div>
+      <div class="scan-progress"></div>
+    `;
     resultsDiv.style.display = "none";
     resultsDiv.innerHTML = "";
 
@@ -55,27 +101,23 @@ document.addEventListener('DOMContentLoaded', function () {
             }
           }
 
-          // Get the URL
-          const url = window.location.href;
-
-          return {
-            title,
-            content,
-            url
-          };
+          return content;
         }
       });
 
-      const pageData = result[0].result;
+      const pageContent = result[0].result;
+
+      if (!pageContent || pageContent.trim().length === 0) {
+        throw new Error("Could not extract text content from this page.");
+      }
 
       // Send data to Python backend
-      statusDiv.textContent = "Sending to Python backend...";
-      const response = await fetch(`${window.extensionConfig.apiUrl}/api/fact-check`, {
+      const response = await fetch(`${window.extensionConfig.apiUrl}/get-fc-text`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(pageData)
+        body: JSON.stringify({ text: pageContent })
       });
 
       if (!response.ok) {
@@ -84,65 +126,151 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const data = await response.json();
 
-      if (data.error) {
-        throw new Error(data.error);
+      if (data.status === 'error') {
+        throw new Error(data.content);
       }
 
-      // Display results
-      statusDiv.textContent = "Fact check complete! Downloaded page data has been cleared.";
-      statusDiv.style.backgroundColor = "#e8f5e9";
-
-      // Show results
+      // Hide loading status
+      statusDiv.style.display = 'none';
       resultsDiv.style.display = "block";
 
-      // Format the analysis results
-      const analysis = data.analysis;
+      const analysis = data.content;
+      const detailedAnalysis = analysis.fact_check_result.detailed_analysis;
+      const overall = detailedAnalysis.overall_analysis;
+      const claims = detailedAnalysis.claim_analysis;
+      const sources = detailedAnalysis.source_analysis;
+      const sourceUrls = analysis.sources;
 
-      // Create header
-      const header = document.createElement('h3');
-      header.textContent = "Fact Check Results";
-      resultsDiv.appendChild(header);
+      // --- Overall Analysis Section ---
+      const overallDiv = document.createElement('div');
 
-      // Create summary section
-      const summary = document.createElement('div');
-      summary.innerHTML = `<p><strong>Summary:</strong> ${analysis.summary}</p>`;
-      resultsDiv.appendChild(summary);
+      // Truth Score
+      const scoreDiv = document.createElement('div');
+      scoreDiv.className = 'truth-score';
 
-      // Create fact items
-      const factsHeader = document.createElement('h4');
-      factsHeader.textContent = "Specific Claims";
-      resultsDiv.appendChild(factsHeader);
+      let scoreClass = 'low-score';
+      if (overall.truth_score >= 0.75) scoreClass = 'high-score';
+      else if (overall.truth_score >= 0.4) scoreClass = 'medium-score';
 
-      if (analysis.claims && analysis.claims.length > 0) {
-        analysis.claims.forEach(claim => {
-          const factItem = document.createElement('div');
-          factItem.className = 'fact-item';
+      scoreDiv.innerHTML = `
+        <div class="score-value">${overall.truth_score}</div>
+        <div class="score-bar">
+          <div class="score-fill ${scoreClass}" style="width: ${overall.truth_score * 100}%"></div>
+        </div>
+      `;
+      overallDiv.appendChild(scoreDiv);
 
-          // Determine status class
-          let statusClass = 'neutral';
-          if (claim.accuracy === 'accurate') {
-            statusClass = 'accurate';
-          } else if (claim.accuracy === 'inaccurate') {
-            statusClass = 'inaccurate';
-          }
+      // Reliability
+      const reliabilityP = document.createElement('p');
+      reliabilityP.innerHTML = `<strong>Reliability:</strong> ${overall.reliability_assessment}`;
+      reliabilityP.style.marginBottom = '10px';
+      overallDiv.appendChild(reliabilityP);
 
-          factItem.innerHTML = `
-              <p><strong>Claim:</strong> ${claim.statement}</p>
-              <p class="${statusClass}"><strong>Assessment:</strong> ${claim.accuracy}</p>
-              <p><strong>Explanation:</strong> ${claim.explanation}</p>
-            `;
+      // Key Findings
+      const findingsTitle = document.createElement('p');
+      findingsTitle.innerHTML = `<strong>Key Findings:</strong>`;
+      findingsTitle.style.marginBottom = '5px';
+      overallDiv.appendChild(findingsTitle);
 
-          resultsDiv.appendChild(factItem);
-        });
+      const findingsList = document.createElement('ul');
+      findingsList.className = 'findings-list';
+      overall.key_findings.forEach(finding => {
+        const li = document.createElement('li');
+        li.textContent = finding;
+        findingsList.appendChild(li);
+      });
+      overallDiv.appendChild(findingsList);
+
+      resultsDiv.appendChild(createCollapsibleSection('Overall Analysis', overallDiv, true));
+
+      // --- Source Analysis Section ---
+      const sourcesDiv = document.createElement('div');
+
+      if (sources && sources.length > 0) {
+        const table = document.createElement('table');
+        table.className = 'source-table';
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>Source</th>
+              <th>Credibility</th>
+              <th>Transparency</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${sources.map((source, index) => `
+              <tr>
+                <td>
+                  <a href="${sourceUrls[index] || '#'}" target="_blank" class="source-link">${source.source}</a>
+                </td>
+                <td style="color: ${source.credibility_score > 0.7 ? 'var(--green-primary)' : source.credibility_score > 0.4 ? 'var(--amber-primary)' : 'var(--rose-primary)'}">
+                  ${source.credibility_score.toFixed(2)}
+                </td>
+                <td>${source.transparency_score.toFixed(2)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        `;
+        sourcesDiv.appendChild(table);
       } else {
-        const noFacts = document.createElement('p');
-        noFacts.textContent = "No specific claims were analyzed.";
-        resultsDiv.appendChild(noFacts);
+        sourcesDiv.textContent = "No specific sources analyzed.";
       }
 
+      // Source URLs list
+      if (sourceUrls && sourceUrls.length > 0) {
+        const urlsTitle = document.createElement('h4');
+        urlsTitle.textContent = "Source URLs";
+        urlsTitle.style.marginTop = "15px";
+        urlsTitle.style.marginBottom = "5px";
+        urlsTitle.style.color = "var(--green-primary)";
+        urlsTitle.style.fontSize = "14px";
+        sourcesDiv.appendChild(urlsTitle);
+
+        const urlList = document.createElement('ul');
+        urlList.className = 'findings-list';
+        sourceUrls.forEach(url => {
+          const li = document.createElement('li');
+          li.innerHTML = `<a href="${url}" target="_blank" class="source-link">${url}</a>`;
+          urlList.appendChild(li);
+        });
+        sourcesDiv.appendChild(urlList);
+      }
+
+      resultsDiv.appendChild(createCollapsibleSection('Source Analysis', sourcesDiv));
+
+
+      // --- Claim Analysis Section ---
+      const claimsDiv = document.createElement('div');
+
+      if (claims && claims.length > 0) {
+        claims.forEach(claim => {
+          const claimItem = document.createElement('div');
+          claimItem.className = 'fact-item';
+
+          let statusClass = 'neutral';
+          if (claim.verification_status === 'Verified') statusClass = 'accurate';
+          else if (claim.verification_status === 'Refuted') statusClass = 'inaccurate';
+          else if (claim.verification_status === 'Partially Verified') statusClass = 'partially-accurate';
+
+          claimItem.innerHTML = `
+            <div class="fact-statement">${claim.claim}</div>
+            <div class="${statusClass}" style="font-size: 13px; margin-bottom: 4px;">
+              <strong>Status:</strong> ${claim.verification_status} (Confidence: ${claim.confidence_level})
+            </div>
+          `;
+          claimsDiv.appendChild(claimItem);
+        });
+      } else {
+        claimsDiv.textContent = "No specific claims analyzed.";
+      }
+
+      resultsDiv.appendChild(createCollapsibleSection('Claim Analysis', claimsDiv));
+
     } catch (error) {
+      statusDiv.style.display = 'block';
       statusDiv.textContent = `Error: ${error.message}`;
       statusDiv.style.backgroundColor = "#ffebee";
+      statusDiv.style.color = "#c62828";
     }
   });
 });
